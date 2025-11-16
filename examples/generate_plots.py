@@ -16,7 +16,7 @@ from src.comparison import (
     generate_array_with_duplicates,
     compare_algorithms
 )
-from src.quicksort import quicksort, randomized_quicksort
+from src.quicksort import quicksort, randomized_quicksort, quicksort_3way
 import os
 
 
@@ -300,6 +300,168 @@ def generate_performance_plots():
     print("Plots saved in the 'docs' directory.")
 
 
+def generate_3way_quicksort_plot():
+    """Generate visualization comparing standard Quicksort vs Three-Way Quicksort on duplicate-heavy data."""
+    print("\nGenerating Three-Way Quicksort comparison plot...")
+    
+    # Ensure docs directory exists
+    os.makedirs('docs', exist_ok=True)
+    
+    # Define algorithms for comparison
+    algorithms = {
+        'Standard Quicksort (Randomized)': lambda arr: randomized_quicksort(arr, seed=42),
+        'Three-Way Quicksort': lambda arr: quicksort_3way(arr)
+    }
+    
+    # Test with different duplicate levels
+    sizes = [100, 500, 1000, 2000, 5000, 10000]
+    duplicate_configs = [
+        ('10 Unique Values', lambda size: generate_array_with_duplicates(size, unique_count=10)),
+        ('5 Unique Values', lambda size: generate_array_with_duplicates(size, unique_count=5)),
+        ('All Equal', lambda size: [5] * size)  # All elements are the same
+    ]
+    
+    print("Running benchmarks for Three-Way Quicksort comparison...")
+    
+    # Run benchmarks once for all configurations
+    all_results = {}
+    for config_name, gen_func in duplicate_configs:
+        array_generators = {'Test': gen_func}
+        results = compare_algorithms(
+            algorithms=algorithms,
+            array_generators=array_generators,
+            sizes=sizes,
+            iterations=3
+        )
+        all_results[config_name] = results
+    
+    # Create figure with subplots
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle('Three-Way Quicksort vs Standard Quicksort on Duplicate-Heavy Data', 
+                 fontsize=16, fontweight='bold')
+    
+    colors = ['#1f77b4', '#ff7f0e']
+    markers = ['o', 's']
+    
+    for config_idx, (config_name, _) in enumerate(duplicate_configs):
+        ax = axes[config_idx]
+        results = all_results[config_name]
+        
+        for algo_idx, algo_name in enumerate(algorithms.keys()):
+            if 'Test' in results[algo_name]:
+                sizes_list = sorted(results[algo_name]['Test'].keys())
+                # Filter out infinite values
+                valid_data = [(s, results[algo_name]['Test'][s]['mean']) 
+                             for s in sizes_list 
+                             if np.isfinite(results[algo_name]['Test'][s]['mean'])]
+                if valid_data:
+                    valid_sizes, valid_times = zip(*valid_data)
+                    ax.plot(valid_sizes, valid_times, marker=markers[algo_idx], 
+                           label=algo_name, color=colors[algo_idx],
+                           linewidth=2.5, markersize=8)
+        
+        ax.set_xlabel('Array Size', fontsize=11, fontweight='bold')
+        ax.set_ylabel('Time (seconds)', fontsize=11, fontweight='bold')
+        ax.set_title(f'{config_name}', fontsize=12, fontweight='bold')
+        ax.legend(fontsize=10)
+        ax.grid(True, alpha=0.3)
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+    
+    plt.tight_layout()
+    plt.savefig('docs/quicksort_3way_comparison.png', dpi=300, bbox_inches='tight')
+    print("Saved: docs/quicksort_3way_comparison.png")
+    plt.close()
+    
+    # Also create a bar chart for specific sizes
+    print("Generating Three-Way Quicksort bar chart...")
+    fig, ax = plt.subplots(figsize=(14, 8))
+    
+    # Test specific sizes with different duplicate levels
+    test_sizes = [1000, 5000, 10000]
+    x = np.arange(len(test_sizes))
+    width = 0.25
+    
+    configs_for_bar = [
+        ('10 Unique', lambda size: generate_array_with_duplicates(size, unique_count=10)),
+        ('5 Unique', lambda size: generate_array_with_duplicates(size, unique_count=5)),
+        ('All Equal', lambda size: [5] * size)
+    ]
+    
+    bar_colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+    
+    # Run benchmarks for bar chart
+    bar_results = {}
+    for config_name, gen_func in configs_for_bar:
+        array_generators = {'Test': gen_func}
+        results = compare_algorithms(
+            algorithms=algorithms,
+            array_generators=array_generators,
+            sizes=test_sizes,
+            iterations=3
+        )
+        bar_results[config_name] = results
+    
+    for config_idx, (config_name, _) in enumerate(configs_for_bar):
+        results = bar_results[config_name]
+        standard_times = []
+        threeway_times = []
+        
+        for size in test_sizes:
+            std_time = None
+            way3_time = None
+            
+            if 'Test' in results['Standard Quicksort (Randomized)']:
+                if size in results['Standard Quicksort (Randomized)']['Test']:
+                    mean_val = results['Standard Quicksort (Randomized)']['Test'][size]['mean']
+                    if np.isfinite(mean_val):
+                        std_time = mean_val
+            
+            if 'Test' in results['Three-Way Quicksort']:
+                if size in results['Three-Way Quicksort']['Test']:
+                    mean_val = results['Three-Way Quicksort']['Test'][size]['mean']
+                    if np.isfinite(mean_val):
+                        way3_time = mean_val
+            
+            standard_times.append(std_time if std_time is not None else np.nan)
+            threeway_times.append(way3_time if way3_time is not None else np.nan)
+        
+        offset = (config_idx - 1) * width
+        bars1 = ax.bar(x + offset, standard_times, width/2, 
+                      label=f'Standard ({config_name})', 
+                      color=bar_colors[config_idx], alpha=0.7)
+        bars2 = ax.bar(x + offset + width/2, threeway_times, width/2, 
+                      label=f'Three-Way ({config_name})', 
+                      color=bar_colors[config_idx], alpha=0.9)
+        
+        # Add value labels
+        for bars in [bars1, bars2]:
+            for bar in bars:
+                height = bar.get_height()
+                if height > 0 and np.isfinite(height):
+                    ax.text(bar.get_x() + bar.get_width()/2., height,
+                           f'{height:.4f}s',
+                           ha='center', va='bottom', fontsize=8, rotation=90)
+    
+    ax.set_xlabel('Array Size', fontsize=12, fontweight='bold')
+    ax.set_ylabel('Time (seconds)', fontsize=12, fontweight='bold')
+    ax.set_title('Three-Way Quicksort Performance on Duplicate-Heavy Data', 
+                fontsize=14, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(s) for s in test_sizes])
+    ax.legend(fontsize=10, ncol=3, loc='upper left')
+    ax.grid(True, alpha=0.3, axis='y')
+    ax.set_yscale('log')
+    
+    plt.tight_layout()
+    plt.savefig('docs/quicksort_3way_bar.png', dpi=300, bbox_inches='tight')
+    print("Saved: docs/quicksort_3way_bar.png")
+    plt.close()
+    
+    print("Three-Way Quicksort plots generated successfully!")
+
+
 if __name__ == '__main__':
     generate_performance_plots()
+    generate_3way_quicksort_plot()
 
