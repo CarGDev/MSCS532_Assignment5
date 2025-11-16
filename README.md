@@ -52,18 +52,18 @@ MSCS532_Assignment5/
 
 | Scenario      | Deterministic Quicksort | Randomized Quicksort | Notes |
 |---------------|-------------------------|----------------------|-------|
-| Best Case     | $\(O(n \log n)\)$         | \(O(n \log n)\)      | Balanced partitions from median pivots |
-| Average Case  | \(O(n \log n)\)         | \(O(n \log n)\)      | Expected logarithmic recursion depth |
-| Worst Case    | \(O(n^2)\)              | \(O(n^2)\)           | Occurs with highly unbalanced splits |
+| Best Case     | $\(O(n \log n)\)$         | $\(O(n \log n)\)$      | Balanced partitions from median pivots |
+| Average Case  | $\(O(n \log n)\)$         | $\(O(n \log n)\)$      | Expected logarithmic recursion depth |
+| Worst Case    | $\(O(n^2)\)$              | $\(O(n^2)\)$           | Occurs with highly unbalanced splits |
 
-- **Average-case intuition:** Balanced partitions of size \(n/2\) produce the recurrence \(T(n) = 2T(n/2) + O(n)\), which resolves to \(O(n \log n)\).
-- **Worst-case intuition:** Consistently poor pivots reduce the problem by one element, yielding \(T(n) = T(n - 1) + O(n)\) and \(O(n^2)\) behavior.
-- **Space complexity:** \(O(\log n)\) expected stack depth for balanced recursion, \(O(n)\) in the worst case. Randomized pivot selection significantly decreases the probability of worst-case depth on adversarial inputs.
+- **Average-case intuition:** Balanced partitions of size \(n/2\) produce the recurrence $\(T(n) = 2T(n/2) + O(n)\)$, which resolves to $\(O(n \log n)\)$.
+- **Worst-case intuition:** Consistently poor pivots reduce the problem by one element, yielding $\(T(n) = T(n - 1) + O(n)\)$ and $\(O(n^2)\)$ behavior.
+- **Space complexity:** $\(O(\log n)\)$ expected stack depth for balanced recursion, $\(O(n)\)$ in the worst case. Randomized pivot selection significantly decreases the probability of worst-case depth on adversarial inputs.
 
 ## 3. Randomized Quicksort
 
 - Randomization chooses pivots uniformly at random, ensuring that any specific pivot ordering is unlikely.
-- While the theoretical worst case remains \(O(n^2)\), the probability of encountering it drops exponentially with input size.
+- While the theoretical worst case remains $\(O(n^2)\)$, the probability of encountering it drops exponentially with input size.
 - The implementation exposes an optional `seed` to guarantee repeatable experimental runs while retaining stochastic behavior by default.
 
 ## 4. Empirical Analysis
@@ -78,7 +78,7 @@ MSCS532_Assignment5/
 ### Key Observations
 
 - Randomized Quicksort consistently outperforms deterministic Quicksort on sorted and reverse-sorted arrays by avoiding degenerate partitions.
-- Both versions exhibit \(O(n \log n)\) scaling on random inputs, aligning with theoretical expectations.
+- Both versions exhibit $\(O(n \log n)\)$ scaling on random inputs, aligning with theoretical expectations.
 - Deterministic Quicksort degrades toward quadratic performance as inputs approach worst-case ordering; randomization flattens this curve.
 - Three-way Quicksort (explored in examples/tests) provides strong performance on datasets with heavy duplication.
 
@@ -90,9 +90,9 @@ In some visualizations (particularly `quicksort_worst_case.png` and `quicksort_c
 
 **Why execution times become infinite:**
 
-1. **Worst-case complexity:** On sorted or reverse-sorted inputs, deterministic Quicksort (using the last element as pivot) creates highly unbalanced partitions, resulting in \(O(n^2)\) time complexity.
+1. **Worst-case complexity:** On sorted or reverse-sorted inputs, deterministic Quicksort (using the last element as pivot) creates highly unbalanced partitions, resulting in $\(O(n^2)\)$ time complexity.
 
-2. **Recursion depth:** For large arrays (typically ≥ 1,000 elements), the algorithm requires \(O(n)\) recursive calls, which can exceed Python's default recursion limit (usually 1,000) and raise a `RecursionError`.
+2. **Recursion depth:** For large arrays (typically ≥ 1,000 elements), the algorithm requires $\(O(n)\)$ recursive calls, which can exceed Python's default recursion limit (usually 1,000) and raise a `RecursionError`.
 
 3. **Timeout behavior:** Even when recursion limits are increased, the quadratic time complexity means execution times grow prohibitively large. For arrays of size 5,000 or 10,000, deterministic Quicksort may take minutes or hours to complete, making it impractical for benchmarking.
 
