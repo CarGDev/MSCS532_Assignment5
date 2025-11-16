@@ -164,9 +164,4 @@ The test suite verifies correctness for deterministic, randomized, and three-way
 
 This project is submitted for academic evaluation in MSCS532 – Data Structures and Algorithms. All code, analysis, and documentation were authored by Carlos Gutierrez for the specific purpose of this assignment.
 
----
-
-© 2025 Carlos Gutierrez. All rights reserved.
-
-
 
