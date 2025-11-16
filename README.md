@@ -52,7 +52,7 @@ MSCS532_Assignment5/
 
 | Scenario      | Deterministic Quicksort | Randomized Quicksort | Notes |
 |---------------|-------------------------|----------------------|-------|
-| Best Case     | \(O(n \log n)\)         | \(O(n \log n)\)      | Balanced partitions from median pivots |
+| Best Case     | $\(O(n \log n)\)$         | \(O(n \log n)\)      | Balanced partitions from median pivots |
 | Average Case  | \(O(n \log n)\)         | \(O(n \log n)\)      | Expected logarithmic recursion depth |
 | Worst Case    | \(O(n^2)\)              | \(O(n^2)\)           | Occurs with highly unbalanced splits |
 
